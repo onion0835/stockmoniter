@@ -203,6 +203,77 @@ def get_status():
     })
 
 
+@app.route('/api/stock-chart/<code>')
+def get_stock_chart(code):
+    """获取股票/ETF的历史行情数据"""
+    try:
+        import akshare as ak
+        from datetime import datetime, timedelta
+
+        # 获取时间范围（默认最近3个月）
+        period = request.args.get('period', '3m')
+
+        # 计算开始日期
+        end_date = datetime.now()
+        if period == '1m':
+            start_date = end_date - timedelta(days=30)
+        elif period == '3m':
+            start_date = end_date - timedelta(days=90)
+        elif period == '6m':
+            start_date = end_date - timedelta(days=180)
+        elif period == '1y':
+            start_date = end_date - timedelta(days=365)
+        else:
+            start_date = end_date - timedelta(days=90)
+
+        start_date_str = start_date.strftime('%Y%m%d')
+        end_date_str = end_date.strftime('%Y%m%d')
+
+        # 获取历史行情数据
+        try:
+            # 尝试获取A股数据
+            df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="qfq")
+        except:
+            # 如果是ETF，尝试ETF接口
+            try:
+                df = ak.fund_etf_hist_em(symbol=code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="qfq")
+            except:
+                return jsonify({'success': False, 'message': '获取数据失败，请稍后重试'}), 404
+
+        if df is None or df.empty:
+            return jsonify({'success': False, 'message': '暂无数据'}), 404
+
+        # 转换数据格式
+        chart_data = {
+            'dates': df['日期'].tolist(),
+            'prices': {
+                'open': df['开盘'].tolist(),
+                'close': df['收盘'].tolist(),
+                'high': df['最高'].tolist(),
+                'low': df['最低'].tolist(),
+                'volume': df['成交量'].tolist()
+            },
+            'latest': {
+                'price': float(df.iloc[-1]['收盘']),
+                'change': float(df.iloc[-1]['涨跌幅']) if '涨跌幅' in df.columns else 0,
+                'volume': int(df.iloc[-1]['成交量'])
+            }
+        }
+
+        return jsonify({
+            'success': True,
+            'code': code,
+            'data': chart_data
+        })
+
+    except Exception as e:
+        print(f"获取股票走势失败: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'获取数据失败: {str(e)}'
+        }), 500
+
+
 if __name__ == '__main__':
     # 启动时加载一次数据
     if USE_REALTIME_DATA:

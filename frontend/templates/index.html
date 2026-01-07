@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         [v-cloak] { display: none; }
         .fade-enter-active, .fade-leave-active {
@@ -121,8 +122,8 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
-                                        <tr v-for="stock in highDividendStocks.ultra_high" :key="stock.code" class="hover:bg-gray-50">
-                                            <td class="px-4 py-3 font-medium text-gray-900">[[ stock.name ]]</td>
+                                        <tr v-for="stock in highDividendStocks.ultra_high" :key="stock.code" class="hover:bg-gray-50 cursor-pointer" @click="showStockChart(stock)">
+                                            <td class="px-4 py-3 font-medium text-blue-600 hover:text-blue-800">[[ stock.name ]]</td>
                                             <td class="px-4 py-3 text-gray-600">[[ stock.code ]]</td>
                                             <td class="px-4 py-3">
                                                 <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">
@@ -152,8 +153,8 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
-                                        <tr v-for="stock in highDividendStocks.stable_high" :key="stock.code" class="hover:bg-gray-50">
-                                            <td class="px-4 py-3 font-medium text-gray-900">[[ stock.name ]]</td>
+                                        <tr v-for="stock in highDividendStocks.stable_high" :key="stock.code" class="hover:bg-gray-50 cursor-pointer" @click="showStockChart(stock)">
+                                            <td class="px-4 py-3 font-medium text-blue-600 hover:text-blue-800">[[ stock.name ]]</td>
                                             <td class="px-4 py-3 text-gray-600">[[ stock.code ]]</td>
                                             <td class="px-4 py-3">
                                                 <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">
@@ -183,8 +184,8 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
-                                        <tr v-for="stock in highDividendStocks.financial" :key="stock.code" class="hover:bg-gray-50">
-                                            <td class="px-4 py-3 font-medium text-gray-900">[[ stock.name ]]</td>
+                                        <tr v-for="stock in highDividendStocks.financial" :key="stock.code" class="hover:bg-gray-50 cursor-pointer" @click="showStockChart(stock)">
+                                            <td class="px-4 py-3 font-medium text-blue-600 hover:text-blue-800">[[ stock.name ]]</td>
                                             <td class="px-4 py-3 text-gray-600">[[ stock.code ]]</td>
                                             <td class="px-4 py-3">
                                                 <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-semibold">
@@ -209,8 +210,9 @@
                             <h3 class="text-lg font-semibold mb-3 text-yellow-600">第一梯队 (超级龙头)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div v-for="stock in brokerStocks.tier1" :key="stock.code"
-                                     class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-300 rounded-lg p-4">
-                                    <div class="font-bold text-lg text-gray-800 mb-2">[[ stock.name ]]</div>
+                                     @click="showStockChart(stock)"
+                                     class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-300 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                                    <div class="font-bold text-lg text-blue-600 hover:text-blue-800 mb-2">[[ stock.name ]]</div>
                                     <div class="text-sm text-gray-600 mb-1">代码: [[ stock.code ]]</div>
                                     <div class="text-sm text-gray-600 mb-1" v-if="stock.revenue">营收: [[ stock.revenue ]]</div>
                                     <div class="text-sm text-gray-600 mb-1" v-if="stock.net_profit">净利: [[ stock.net_profit ]]</div>
@@ -224,8 +226,9 @@
                             <h3 class="text-lg font-semibold mb-3 text-blue-600">第二梯队 (头部券商)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div v-for="stock in brokerStocks.tier2" :key="stock.code"
-                                     class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-4">
-                                    <div class="font-bold text-lg text-gray-800 mb-2">[[ stock.name ]]</div>
+                                     @click="showStockChart(stock)"
+                                     class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                                    <div class="font-bold text-lg text-blue-600 hover:text-blue-800 mb-2">[[ stock.name ]]</div>
                                     <div class="text-sm text-gray-600 mb-1">代码: [[ stock.code ]]</div>
                                     <div class="text-sm text-gray-600 mb-1" v-if="stock.net_profit">净利: [[ stock.net_profit ]]</div>
                                     <div class="text-xs text-gray-500 mt-2 italic">[[ stock.description ]]</div>
@@ -238,8 +241,9 @@
                             <h3 class="text-lg font-semibold mb-3 text-purple-600">第三梯队 (特色券商)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div v-for="stock in brokerStocks.tier3" :key="stock.code"
-                                     class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-300 rounded-lg p-4">
-                                    <div class="font-bold text-lg text-gray-800 mb-2">[[ stock.name ]]</div>
+                                     @click="showStockChart(stock)"
+                                     class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-300 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                                    <div class="font-bold text-lg text-blue-600 hover:text-blue-800 mb-2">[[ stock.name ]]</div>
                                     <div class="text-sm text-gray-600 mb-1">代码: [[ stock.code ]]</div>
                                     <div class="text-xs text-gray-500 mt-2 italic">[[ stock.description ]]</div>
                                 </div>
@@ -496,6 +500,56 @@
             </div>
         </div>
 
+        <!-- 走势图模态框 -->
+        <div v-if="showChartModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="closeChartModal">
+            <div class="bg-white rounded-lg shadow-2xl w-11/12 max-w-6xl max-h-[90vh] overflow-hidden">
+                <!-- 模态框头部 -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold">[[ chartData.name ]] ([[ chartData.code ]])</h3>
+                        <div class="text-sm mt-1 flex items-center gap-4">
+                            <span>最新价: <strong class="text-lg">[[ chartData.latest.price ]]</strong></span>
+                            <span :class="chartData.latest.change >= 0 ? 'text-red-300' : 'text-green-300'">
+                                [[ chartData.latest.change >= 0 ? '↑' : '↓' ]] [[ Math.abs(chartData.latest.change).toFixed(2) ]]%
+                            </span>
+                        </div>
+                    </div>
+                    <button @click="closeChartModal" class="text-white hover:text-gray-200 text-2xl">
+                        ×
+                    </button>
+                </div>
+
+                <!-- 时间范围选择 -->
+                <div class="px-6 py-3 bg-gray-50 border-b flex items-center gap-2">
+                    <span class="text-sm text-gray-600">时间范围:</span>
+                    <button
+                        v-for="p in periods"
+                        :key="p.value"
+                        @click="changePeriod(p.value)"
+                        :class="[
+                            'px-3 py-1 rounded text-sm transition-colors',
+                            currentPeriod === p.value
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                        ]"
+                    >
+                        [[ p.label ]]
+                    </button>
+                </div>
+
+                <!-- 图表容器 -->
+                <div class="p-6">
+                    <div v-if="isLoadingChart" class="flex items-center justify-center h-96">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                            <p class="mt-4 text-gray-600">加载中...</p>
+                        </div>
+                    </div>
+                    <div v-else id="stock-chart" class="w-full" style="height: 500px;"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- 页脚 -->
         <footer class="bg-gray-800 text-white mt-8 py-6">
             <div class="container mx-auto px-4 text-center">
@@ -552,7 +606,26 @@
                         last_update_time: null,
                         cache_status: 'empty'
                     },
-                    isRefreshing: false
+                    isRefreshing: false,
+                    // 走势图相关
+                    showChartModal: false,
+                    isLoadingChart: false,
+                    chartData: {
+                        name: '',
+                        code: '',
+                        latest: {
+                            price: 0,
+                            change: 0
+                        }
+                    },
+                    currentPeriod: '3m',
+                    periods: [
+                        { value: '1m', label: '1个月' },
+                        { value: '3m', label: '3个月' },
+                        { value: '6m', label: '6个月' },
+                        { value: '1y', label: '1年' }
+                    ],
+                    chartInstance: null
                 }
             },
             mounted() {
@@ -621,6 +694,217 @@
                         div.style.opacity = '0';
                         setTimeout(() => div.remove(), 300);
                     }, 3000);
+                },
+                // 显示股票走势图
+                async showStockChart(stock) {
+                    this.chartData.name = stock.name;
+                    this.chartData.code = stock.code;
+                    this.showChartModal = true;
+                    this.currentPeriod = '3m';
+
+                    await this.loadChartData(stock.code, this.currentPeriod);
+                },
+                // 关闭走势图模态框
+                closeChartModal() {
+                    this.showChartModal = false;
+                    if (this.chartInstance) {
+                        this.chartInstance.dispose();
+                        this.chartInstance = null;
+                    }
+                },
+                // 切换时间周期
+                async changePeriod(period) {
+                    this.currentPeriod = period;
+                    await this.loadChartData(this.chartData.code, period);
+                },
+                // 加载图表数据
+                async loadChartData(code, period) {
+                    this.isLoadingChart = true;
+
+                    try {
+                        const response = await axios.get(`/api/stock-chart/${code}?period=${period}`);
+
+                        if (response.data.success) {
+                            const data = response.data.data;
+                            this.chartData.latest = data.latest;
+
+                            // 等待DOM更新
+                            await this.$nextTick();
+
+                            // 渲染图表
+                            this.renderChart(data);
+                        } else {
+                            this.showMessage('获取数据失败: ' + response.data.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('加载图表数据失败:', error);
+                        this.showMessage('加载图表数据失败', 'error');
+                    } finally {
+                        this.isLoadingChart = false;
+                    }
+                },
+                // 渲染图表
+                renderChart(data) {
+                    const chartDom = document.getElementById('stock-chart');
+                    if (!chartDom) return;
+
+                    // 销毁旧图表
+                    if (this.chartInstance) {
+                        this.chartInstance.dispose();
+                    }
+
+                    // 创建新图表
+                    this.chartInstance = echarts.init(chartDom);
+
+                    // 准备K线数据
+                    const klineData = data.dates.map((date, index) => {
+                        return [
+                            data.prices.open[index],
+                            data.prices.close[index],
+                            data.prices.low[index],
+                            data.prices.high[index]
+                        ];
+                    });
+
+                    // 配置图表
+                    const option = {
+                        title: {
+                            text: '股票走势',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'cross'
+                            },
+                            formatter: function (params) {
+                                const dataIndex = params[0].dataIndex;
+                                const date = data.dates[dataIndex];
+                                const kline = params[0].data;
+                                const volume = data.prices.volume[dataIndex];
+
+                                return `
+                                    <div style="font-size: 12px;">
+                                        <div style="margin-bottom: 5px;"><strong>${date}</strong></div>
+                                        <div>开盘: ${kline[0]}</div>
+                                        <div>收盘: ${kline[1]}</div>
+                                        <div>最低: ${kline[2]}</div>
+                                        <div>最高: ${kline[3]}</div>
+                                        <div>成交量: ${(volume / 10000).toFixed(2)}万</div>
+                                    </div>
+                                `;
+                            }
+                        },
+                        grid: [
+                            {
+                                left: '10%',
+                                right: '10%',
+                                top: '15%',
+                                height: '50%'
+                            },
+                            {
+                                left: '10%',
+                                right: '10%',
+                                top: '70%',
+                                height: '15%'
+                            }
+                        ],
+                        xAxis: [
+                            {
+                                type: 'category',
+                                data: data.dates,
+                                scale: true,
+                                boundaryGap: false,
+                                axisLine: { onZero: false },
+                                splitLine: { show: false },
+                                min: 'dataMin',
+                                max: 'dataMax'
+                            },
+                            {
+                                type: 'category',
+                                gridIndex: 1,
+                                data: data.dates,
+                                scale: true,
+                                boundaryGap: false,
+                                axisLine: { onZero: false },
+                                axisTick: { show: false },
+                                splitLine: { show: false },
+                                axisLabel: { show: false },
+                                min: 'dataMin',
+                                max: 'dataMax'
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                scale: true,
+                                splitArea: {
+                                    show: true
+                                }
+                            },
+                            {
+                                scale: true,
+                                gridIndex: 1,
+                                splitNumber: 2,
+                                axisLabel: { show: false },
+                                axisLine: { show: false },
+                                axisTick: { show: false },
+                                splitLine: { show: false }
+                            }
+                        ],
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                xAxisIndex: [0, 1],
+                                start: 0,
+                                end: 100
+                            },
+                            {
+                                show: true,
+                                xAxisIndex: [0, 1],
+                                type: 'slider',
+                                top: '90%',
+                                start: 0,
+                                end: 100
+                            }
+                        ],
+                        series: [
+                            {
+                                name: '日K',
+                                type: 'candlestick',
+                                data: klineData,
+                                itemStyle: {
+                                    color: '#ef4444',
+                                    color0: '#22c55e',
+                                    borderColor: '#ef4444',
+                                    borderColor0: '#22c55e'
+                                }
+                            },
+                            {
+                                name: '成交量',
+                                type: 'bar',
+                                xAxisIndex: 1,
+                                yAxisIndex: 1,
+                                data: data.prices.volume,
+                                itemStyle: {
+                                    color: function(params) {
+                                        const dataIndex = params.dataIndex;
+                                        const open = data.prices.open[dataIndex];
+                                        const close = data.prices.close[dataIndex];
+                                        return close >= open ? '#ef4444' : '#22c55e';
+                                    }
+                                }
+                            }
+                        ]
+                    };
+
+                    this.chartInstance.setOption(option);
+
+                    // 窗口大小改变时重新调整图表
+                    window.addEventListener('resize', () => {
+                        if (this.chartInstance) {
+                            this.chartInstance.resize();
+                        }
+                    });
                 }
             }
         }).mount('#app');
