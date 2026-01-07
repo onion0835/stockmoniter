@@ -244,14 +244,17 @@ def get_stock_chart(code):
             return jsonify({'success': False, 'message': '暂无数据'}), 404
 
         # 转换数据格式
+        # 确保日期是字符串格式
+        dates = df['日期'].astype(str).tolist()
+
         chart_data = {
-            'dates': df['日期'].tolist(),
+            'dates': dates,
             'prices': {
-                'open': df['开盘'].tolist(),
-                'close': df['收盘'].tolist(),
-                'high': df['最高'].tolist(),
-                'low': df['最低'].tolist(),
-                'volume': df['成交量'].tolist()
+                'open': [float(x) for x in df['开盘'].tolist()],
+                'close': [float(x) for x in df['收盘'].tolist()],
+                'high': [float(x) for x in df['最高'].tolist()],
+                'low': [float(x) for x in df['最低'].tolist()],
+                'volume': [int(x) for x in df['成交量'].tolist()]
             },
             'latest': {
                 'price': float(df.iloc[-1]['收盘']),
