@@ -623,7 +623,8 @@
                         { value: '1m', label: '1个月' },
                         { value: '3m', label: '3个月' },
                         { value: '6m', label: '6个月' },
-                        { value: '1y', label: '1年' }
+                        { value: '1y', label: '1年' },
+                        { value: '2y', label: '2年' }
                     ],
                     chartInstance: null
                 }
@@ -777,11 +778,19 @@
                         ];
                     });
 
+                    // 准备去年同期收盘价数据（用于对比线）
+                    const hasLastYearData = data.lastYear && data.lastYear.prices && data.lastYear.prices.close;
+                    const lastYearCloseData = hasLastYearData ? data.lastYear.prices.close : [];
+
                     // 配置图表
                     const option = {
                         title: {
-                            text: '股票走势',
+                            text: '股票走势' + (hasLastYearData ? '（含去年同期对比）' : ''),
                             left: 'center'
+                        },
+                        legend: {
+                            data: hasLastYearData ? ['日K', '去年同期', '成交量'] : ['日K', '成交量'],
+                            top: 30
                         },
                         tooltip: {
                             trigger: 'axis',
@@ -791,19 +800,29 @@
                             formatter: function (params) {
                                 const dataIndex = params[0].dataIndex;
                                 const date = data.dates[dataIndex];
-                                const kline = params[0].data;
-                                const volume = data.prices.volume[dataIndex];
 
-                                return `
-                                    <div style="font-size: 12px;">
-                                        <div style="margin-bottom: 5px;"><strong>${date}</strong></div>
-                                        <div>开盘: ${kline[0]}</div>
-                                        <div>收盘: ${kline[1]}</div>
-                                        <div>最低: ${kline[2]}</div>
-                                        <div>最高: ${kline[3]}</div>
-                                        <div>成交量: ${(volume / 10000).toFixed(2)}万</div>
-                                    </div>
-                                `;
+                                let result = `<div style="font-size: 12px;">`;
+                                result += `<div style="margin-bottom: 5px;"><strong>${date}</strong></div>`;
+
+                                // 遍历所有系列
+                                params.forEach(param => {
+                                    if (param.seriesName === '日K') {
+                                        const kline = param.data;
+                                        const volume = data.prices.volume[dataIndex];
+                                        result += `<div style="color: #333; font-weight: bold; margin-top: 5px;">当前周期</div>`;
+                                        result += `<div>开盘: ${kline[0]}</div>`;
+                                        result += `<div>收盘: ${kline[1]}</div>`;
+                                        result += `<div>最低: ${kline[2]}</div>`;
+                                        result += `<div>最高: ${kline[3]}</div>`;
+                                        result += `<div>成交量: ${(volume / 10000).toFixed(2)}万</div>`;
+                                    } else if (param.seriesName === '去年同期') {
+                                        result += `<div style="color: #f59e0b; font-weight: bold; margin-top: 5px;">去年同期</div>`;
+                                        result += `<div>收盘: ${param.data}</div>`;
+                                    }
+                                });
+
+                                result += `</div>`;
+                                return result;
                             }
                         },
                         grid: [
@@ -908,8 +927,30 @@
                         ]
                     };
 
+                    // 如果有去年同期数据，添加对比线
+                    if (hasLastYearData) {
+                        option.series.push({
+                            name: '去年同期',
+                            type: 'line',
+                            data: lastYearCloseData,
+                            smooth: true,
+                            lineStyle: {
+                                color: '#f59e0b',
+                                width: 2,
+                                type: 'dashed'
+                            },
+                            itemStyle: {
+                                color: '#f59e0b'
+                            },
+                            showSymbol: false
+                        });
+                    }
+
                     this.chartInstance.setOption(option);
                     console.log('图表配置已设置，K线数据数量:', klineData.length);
+                    if (hasLastYearData) {
+                        console.log('去年同期数据数量:', lastYearCloseData.length);
+                    }
 
                     // 强制调整图表大小
                     setTimeout(() => {

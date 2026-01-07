@@ -205,7 +205,7 @@ def get_status():
 
 @app.route('/api/stock-chart/<code>')
 def get_stock_chart(code):
-    """获取股票/ETF的历史行情数据"""
+    """获取股票/ETF的历史行情数据（含同比对比）"""
     try:
         import akshare as ak
         from datetime import datetime, timedelta
@@ -213,55 +213,81 @@ def get_stock_chart(code):
         # 获取时间范围（默认最近3个月）
         period = request.args.get('period', '3m')
 
-        # 计算开始日期
+        # 计算当前周期的开始和结束日期
         end_date = datetime.now()
         if period == '1m':
-            start_date = end_date - timedelta(days=30)
+            days = 30
         elif period == '3m':
-            start_date = end_date - timedelta(days=90)
+            days = 90
         elif period == '6m':
-            start_date = end_date - timedelta(days=180)
+            days = 180
         elif period == '1y':
-            start_date = end_date - timedelta(days=365)
+            days = 365
+        elif period == '2y':
+            days = 730
         else:
-            start_date = end_date - timedelta(days=90)
+            days = 90
 
+        start_date = end_date - timedelta(days=days)
+
+        # 计算去年同期的开始和结束日期
+        last_year_end = end_date - timedelta(days=365)
+        last_year_start = last_year_end - timedelta(days=days)
+
+        # 格式化日期
         start_date_str = start_date.strftime('%Y%m%d')
         end_date_str = end_date.strftime('%Y%m%d')
+        last_year_start_str = last_year_start.strftime('%Y%m%d')
+        last_year_end_str = last_year_end.strftime('%Y%m%d')
 
-        # 获取历史行情数据
-        try:
-            # 尝试获取A股数据
-            df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="qfq")
-        except:
-            # 如果是ETF，尝试ETF接口
+        def fetch_stock_data(start, end):
+            """获取指定时间段的股票数据"""
             try:
-                df = ak.fund_etf_hist_em(symbol=code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="qfq")
+                # 尝试获取A股数据
+                return ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start, end_date=end, adjust="qfq")
             except:
-                return jsonify({'success': False, 'message': '获取数据失败，请稍后重试'}), 404
+                # 如果是ETF，尝试ETF接口
+                try:
+                    return ak.fund_etf_hist_em(symbol=code, period="daily", start_date=start, end_date=end, adjust="qfq")
+                except:
+                    return None
 
-        if df is None or df.empty:
-            return jsonify({'success': False, 'message': '暂无数据'}), 404
+        # 获取当前周期数据
+        df_current = fetch_stock_data(start_date_str, end_date_str)
+        if df_current is None or df_current.empty:
+            return jsonify({'success': False, 'message': '获取当前数据失败，请稍后重试'}), 404
 
-        # 转换数据格式
-        # 确保日期是字符串格式
-        dates = df['日期'].astype(str).tolist()
+        # 获取去年同期数据
+        df_last_year = fetch_stock_data(last_year_start_str, last_year_end_str)
+
+        # 转换当前周期数据格式
+        dates = df_current['日期'].astype(str).tolist()
 
         chart_data = {
             'dates': dates,
             'prices': {
-                'open': [float(x) for x in df['开盘'].tolist()],
-                'close': [float(x) for x in df['收盘'].tolist()],
-                'high': [float(x) for x in df['最高'].tolist()],
-                'low': [float(x) for x in df['最低'].tolist()],
-                'volume': [int(x) for x in df['成交量'].tolist()]
+                'open': [float(x) for x in df_current['开盘'].tolist()],
+                'close': [float(x) for x in df_current['收盘'].tolist()],
+                'high': [float(x) for x in df_current['最高'].tolist()],
+                'low': [float(x) for x in df_current['最低'].tolist()],
+                'volume': [int(x) for x in df_current['成交量'].tolist()]
             },
             'latest': {
-                'price': float(df.iloc[-1]['收盘']),
-                'change': float(df.iloc[-1]['涨跌幅']) if '涨跌幅' in df.columns else 0,
-                'volume': int(df.iloc[-1]['成交量'])
+                'price': float(df_current.iloc[-1]['收盘']),
+                'change': float(df_current.iloc[-1]['涨跌幅']) if '涨跌幅' in df_current.columns else 0,
+                'volume': int(df_current.iloc[-1]['成交量'])
             }
         }
+
+        # 如果去年同期数据存在，添加到返回结果中
+        if df_last_year is not None and not df_last_year.empty:
+            last_year_dates = df_last_year['日期'].astype(str).tolist()
+            chart_data['lastYear'] = {
+                'dates': last_year_dates,
+                'prices': {
+                    'close': [float(x) for x in df_last_year['收盘'].tolist()]
+                }
+            }
 
         return jsonify({
             'success': True,
