@@ -22,10 +22,34 @@
         <!-- 顶部导航栏 -->
         <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
             <div class="container mx-auto px-4 py-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-wrap gap-3">
                     <h1 class="text-2xl font-bold">📊 投资跟踪系统</h1>
-                    <div class="text-sm">
-                        <span class="bg-blue-700 px-3 py-1 rounded">更新时间: [[ updateTime ]]</span>
+                    <div class="flex items-center gap-3 text-sm">
+                        <!-- 数据源状态 -->
+                        <span v-if="systemStatus.realtime_mode" class="bg-green-500 px-3 py-1 rounded flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            实时数据
+                        </span>
+                        <span v-else class="bg-gray-600 px-3 py-1 rounded">静态数据</span>
+
+                        <!-- 更新时间 -->
+                        <span class="bg-blue-700 px-3 py-1 rounded">
+                            更新: [[ systemStatus.last_update_time || updateTime ]]
+                        </span>
+
+                        <!-- 刷新按钮 -->
+                        <button
+                            v-if="systemStatus.realtime_mode"
+                            @click="refreshData"
+                            :disabled="isRefreshing"
+                            class="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 px-4 py-1 rounded flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            [[ isRefreshing ? '刷新中...' : '刷新' ]]
+                        </button>
                     </div>
                 </div>
             </div>
@@ -522,14 +546,29 @@
                         balanced: {},
                         aggressive: {}
                     },
-                    updateTime: ''
+                    updateTime: '',
+                    systemStatus: {
+                        realtime_mode: false,
+                        last_update_time: null,
+                        cache_status: 'empty'
+                    },
+                    isRefreshing: false
                 }
             },
             mounted() {
+                this.loadSystemStatus();
                 this.loadAllData();
                 this.updateTime = new Date().toLocaleString('zh-CN');
             },
             methods: {
+                async loadSystemStatus() {
+                    try {
+                        const response = await axios.get('/api/status');
+                        this.systemStatus = response.data;
+                    } catch (error) {
+                        console.error('获取系统状态失败:', error);
+                    }
+                },
                 async loadAllData() {
                     try {
                         const response = await axios.get('/api/all');
@@ -546,6 +585,42 @@
                         console.error('加载数据失败:', error);
                         alert('加载数据失败，请刷新页面重试');
                     }
+                },
+                async refreshData() {
+                    if (this.isRefreshing) return;
+
+                    this.isRefreshing = true;
+                    try {
+                        const response = await axios.post('/api/refresh');
+                        if (response.data.success) {
+                            // 刷新成功，重新加载所有数据
+                            await this.loadAllData();
+                            await this.loadSystemStatus();
+
+                            // 显示成功消息
+                            this.showMessage('数据刷新成功！', 'success');
+                        } else {
+                            this.showMessage('数据刷新失败: ' + response.data.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('刷新数据失败:', error);
+                        this.showMessage('刷新数据失败，请稍后重试', 'error');
+                    } finally {
+                        this.isRefreshing = false;
+                    }
+                },
+                showMessage(message, type) {
+                    // 简单的消息提示
+                    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+                    const div = document.createElement('div');
+                    div.className = `fixed top-20 right-4 ${bgColor} text-white px-6 py-3 rounded shadow-lg z-50 transition-opacity`;
+                    div.textContent = message;
+                    document.body.appendChild(div);
+
+                    setTimeout(() => {
+                        div.style.opacity = '0';
+                        setTimeout(() => div.remove(), 300);
+                    }, 3000);
                 }
             }
         }).mount('#app');
