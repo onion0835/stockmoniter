@@ -728,25 +728,35 @@
                             const data = response.data.data;
                             this.chartData.latest = data.latest;
 
+                            // 先关闭加载状态
+                            this.isLoadingChart = false;
+
                             // 等待DOM更新
                             await this.$nextTick();
 
-                            // 渲染图表
+                            // 再渲染图表
                             this.renderChart(data);
                         } else {
+                            this.isLoadingChart = false;
                             this.showMessage('获取数据失败: ' + response.data.message, 'error');
                         }
                     } catch (error) {
                         console.error('加载图表数据失败:', error);
-                        this.showMessage('加载图表数据失败', 'error');
-                    } finally {
                         this.isLoadingChart = false;
+                        this.showMessage('加载图表数据失败', 'error');
                     }
                 },
                 // 渲染图表
                 renderChart(data) {
+                    console.log('开始渲染图表，数据:', data);
+
                     const chartDom = document.getElementById('stock-chart');
-                    if (!chartDom) return;
+                    console.log('图表容器:', chartDom);
+
+                    if (!chartDom) {
+                        console.error('找不到图表容器！');
+                        return;
+                    }
 
                     // 销毁旧图表
                     if (this.chartInstance) {
@@ -755,6 +765,7 @@
 
                     // 创建新图表
                     this.chartInstance = echarts.init(chartDom);
+                    console.log('ECharts实例已创建:', this.chartInstance);
 
                     // 准备K线数据
                     const klineData = data.dates.map((date, index) => {
@@ -898,6 +909,15 @@
                     };
 
                     this.chartInstance.setOption(option);
+                    console.log('图表配置已设置，K线数据数量:', klineData.length);
+
+                    // 强制调整图表大小
+                    setTimeout(() => {
+                        if (this.chartInstance) {
+                            this.chartInstance.resize();
+                            console.log('图表已调整大小');
+                        }
+                    }, 100);
 
                     // 窗口大小改变时重新调整图表
                     window.addEventListener('resize', () => {
