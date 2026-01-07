@@ -1,0 +1,410 @@
+{
+  "high_dividend_stocks": {
+    "ultra_high": [
+      {
+        "name": "山煤国际",
+        "code": "600546",
+        "dividend_rate": "8%+",
+        "industry": "煤炭",
+        "payout_ratio": "60%",
+        "category": "超高股息率"
+      },
+      {
+        "name": "郑煤机",
+        "code": "601717",
+        "dividend_rate": "8.63%",
+        "industry": "机械设备",
+        "payout_ratio": "-",
+        "category": "超高股息率"
+      },
+      {
+        "name": "中谷物流",
+        "code": "603565",
+        "dividend_rate": "8%+",
+        "industry": "交通运输",
+        "payout_ratio": "90%+",
+        "category": "超高股息率"
+      },
+      {
+        "name": "中远海控",
+        "code": "601919",
+        "dividend_rate": "7%+",
+        "industry": "航运",
+        "payout_ratio": "-",
+        "category": "超高股息率"
+      },
+      {
+        "name": "地素时尚",
+        "code": "-",
+        "dividend_rate": "6%+",
+        "industry": "消费",
+        "payout_ratio": "-",
+        "category": "超高股息率"
+      }
+    ],
+    "stable_high": [
+      {
+        "name": "中国石化",
+        "code": "600028",
+        "dividend_rate": "4-6%",
+        "industry": "石油",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "中国神华",
+        "code": "601088",
+        "dividend_rate": "4-6%",
+        "industry": "煤炭",
+        "payout_ratio": "75%+",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "粤高速A",
+        "code": "000429",
+        "dividend_rate": "4%+",
+        "industry": "交通运输",
+        "payout_ratio": "70%",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "中材国际",
+        "code": "600970",
+        "dividend_rate": "5%+",
+        "industry": "建材",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "宁沪高速",
+        "code": "600377",
+        "dividend_rate": "4-6%",
+        "industry": "交通运输",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "华能水电",
+        "code": "600025",
+        "dividend_rate": "2-3%",
+        "industry": "电力",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "长江电力",
+        "code": "600900",
+        "dividend_rate": "4-6%",
+        "industry": "电力",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "南山铝业",
+        "code": "-",
+        "dividend_rate": "4-6%",
+        "industry": "有色金属",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      },
+      {
+        "name": "山西焦煤",
+        "code": "-",
+        "dividend_rate": "4-6%",
+        "industry": "煤炭",
+        "payout_ratio": "-",
+        "category": "稳健高股息"
+      }
+    ],
+    "financial": [
+      {
+        "name": "中国人寿",
+        "code": "601628",
+        "dividend_rate": "5%+",
+        "industry": "保险",
+        "payout_ratio": "-",
+        "category": "金融高股息"
+      },
+      {
+        "name": "内蒙华电",
+        "code": "-",
+        "dividend_rate": "5%+",
+        "industry": "电力",
+        "payout_ratio": "-",
+        "category": "金融高股息"
+      },
+      {
+        "name": "贵州茅台",
+        "code": "600519",
+        "dividend_rate": "3.6%",
+        "industry": "白酒",
+        "payout_ratio": "75%",
+        "category": "金融高股息"
+      },
+      {
+        "name": "中国建筑",
+        "code": "601668",
+        "dividend_rate": "4%+",
+        "industry": "建筑",
+        "payout_ratio": "-",
+        "category": "金融高股息"
+      }
+    ]
+  },
+  "broker_stocks": {
+    "tier1": [
+      {
+        "name": "中信证券",
+        "code": "600030",
+        "revenue": "638亿",
+        "net_profit": "217亿",
+        "tier": "第一梯队",
+        "description": "券商一哥"
+      },
+      {
+        "name": "国泰海通",
+        "code": "601211",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第一梯队",
+        "description": "合并后超级航母，资产1.73万亿"
+      },
+      {
+        "name": "华泰证券",
+        "code": "601688",
+        "revenue": "-",
+        "net_profit": "154亿",
+        "tier": "第一梯队",
+        "description": "国际业务强"
+      }
+    ],
+    "tier2": [
+      {
+        "name": "中国银河",
+        "code": "601881",
+        "revenue": "-",
+        "net_profit": "100亿+",
+        "tier": "第二梯队",
+        "description": "头部券商"
+      },
+      {
+        "name": "招商证券",
+        "code": "600999",
+        "revenue": "-",
+        "net_profit": "104亿",
+        "tier": "第二梯队",
+        "description": "头部券商"
+      },
+      {
+        "name": "广发证券",
+        "code": "000776",
+        "revenue": "-",
+        "net_profit": "96亿",
+        "tier": "第二梯队",
+        "description": "头部券商"
+      },
+      {
+        "name": "中信建投",
+        "code": "601066",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第二梯队",
+        "description": "投行业务强"
+      },
+      {
+        "name": "中金公司",
+        "code": "601995",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第二梯队",
+        "description": "国际业务突出"
+      }
+    ],
+    "tier3": [
+      {
+        "name": "申万宏源",
+        "code": "000166",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第三梯队",
+        "description": "ETF业务强"
+      },
+      {
+        "name": "东方财富",
+        "code": "300059",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第三梯队",
+        "description": "互联网券商+金融科技"
+      },
+      {
+        "name": "东方证券",
+        "code": "600958",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第三梯队",
+        "description": "特色券商"
+      },
+      {
+        "name": "兴业证券",
+        "code": "601377",
+        "revenue": "-",
+        "net_profit": "-",
+        "tier": "第三梯队",
+        "description": "特色券商"
+      }
+    ]
+  },
+  "etfs": {
+    "broker": [
+      {
+        "name": "证券ETF",
+        "code": "512000",
+        "fund_company": "华宝基金",
+        "description": "跟踪全指证券公司指数",
+        "suitable_for": "综合配置"
+      },
+      {
+        "name": "证券ETF",
+        "code": "159841",
+        "fund_company": "鹏华基金",
+        "description": "流动性好",
+        "suitable_for": "短线交易"
+      },
+      {
+        "name": "龙头券商ETF",
+        "code": "159993",
+        "fund_company": "-",
+        "description": "跟踪国证证券龙头指数，重仓东方财富/中信证券",
+        "suitable_for": "龙头配置"
+      },
+      {
+        "name": "券商ETF联接",
+        "code": "008590/008591",
+        "fund_company": "-",
+        "description": "场外基金，定投方便",
+        "suitable_for": "定投首选"
+      }
+    ],
+    "dividend": [
+      {
+        "name": "红利ETF",
+        "code": "515180",
+        "fund_company": "易方达",
+        "description": "跟踪中证红利指数",
+        "suitable_for": "稳健配置"
+      },
+      {
+        "name": "红利ETF",
+        "code": "510880",
+        "fund_company": "华泰柏瑞",
+        "description": "规模大流动性好",
+        "suitable_for": "长期持有"
+      },
+      {
+        "name": "标普红利",
+        "code": "501029",
+        "fund_company": "华宝基金",
+        "description": "质量筛选",
+        "suitable_for": "追求质量"
+      },
+      {
+        "name": "中证红利ETF",
+        "code": "159905",
+        "fund_company": "工银瑞信",
+        "description": "-",
+        "suitable_for": "防御配置"
+      }
+    ],
+    "bank": [
+      {
+        "name": "银行ETF",
+        "code": "512800",
+        "fund_company": "华宝基金",
+        "description": "银行板块配置",
+        "suitable_for": "-"
+      },
+      {
+        "name": "银行ETF",
+        "code": "512700",
+        "fund_company": "南方基金",
+        "description": "-",
+        "suitable_for": "-"
+      }
+    ],
+    "financial": [
+      {
+        "name": "金融ETF",
+        "code": "510230",
+        "fund_company": "国泰基金",
+        "description": "券商+银行+保险",
+        "suitable_for": "-"
+      },
+      {
+        "name": "大金融ETF",
+        "code": "516100",
+        "fund_company": "嘉实基金",
+        "description": "-",
+        "suitable_for": "-"
+      }
+    ]
+  },
+  "portfolios": {
+    "conservative": {
+      "name": "保守型（防御为主）",
+      "allocation": {
+        "高股息": "70%",
+        "银行ETF": "30%"
+      },
+      "recommended_products": [
+        "红利ETF (515180)",
+        "银行ETF (512800)",
+        "中国神华",
+        "长江电力"
+      ],
+      "features": "稳定分红，波动小，适合长期持有",
+      "sample_100k": {
+        "红利ETF (515180)": 40000,
+        "银行ETF (512800)": 30000,
+        "现金储备": 30000
+      }
+    },
+    "balanced": {
+      "name": "平衡型（攻守兼备）",
+      "allocation": {
+        "高股息": "40%",
+        "券商": "40%",
+        "银行": "20%"
+      },
+      "recommended_products": [
+        "红利ETF",
+        "证券ETF (512000)",
+        "中信证券",
+        "山煤国际"
+      ],
+      "features": "既有防御又有弹性",
+      "sample_100k": null
+    },
+    "aggressive": {
+      "name": "进取型（弹性优先）",
+      "allocation": {
+        "券商": "60%",
+        "高股息": "30%",
+        "现金": "10%"
+      },
+      "recommended_products": [
+        "龙头券商ETF (159993)",
+        "证券ETF (159841)",
+        "中信证券",
+        "华泰证券"
+      ],
+      "features": "降准降息受益最大，高弹性",
+      "sample_100k": {
+        "证券ETF (159841)": 35000,
+        "龙头券商ETF (159993)": 25000,
+        "红利ETF": 30000,
+        "现金储备": 10000
+      }
+    }
+  }
+}

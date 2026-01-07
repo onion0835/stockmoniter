@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投资跟踪系统 - Investment Tracking Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        [v-cloak] { display: none; }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" v-cloak>
+        <!-- 顶部导航栏 -->
+        <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold">📊 投资跟踪系统</h1>
+                    <div class="text-sm">
+                        <span class="bg-blue-700 px-3 py-1 rounded">更新时间: {{ updateTime }}</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 摘要统计卡片 -->
+        <div class="container mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+                    <div class="text-gray-600 text-sm">高股息股票</div>
+                    <div class="text-3xl font-bold text-gray-800">{{ summary.total_high_dividend_stocks }}</div>
+                    <div class="text-xs text-gray-500 mt-1">支持稳健投资</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                    <div class="text-gray-600 text-sm">券商股票</div>
+                    <div class="text-3xl font-bold text-gray-800">{{ summary.total_broker_stocks }}</div>
+                    <div class="text-xs text-gray-500 mt-1">降息受益板块</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                    <div class="text-gray-600 text-sm">ETF产品</div>
+                    <div class="text-3xl font-bold text-gray-800">{{ summary.total_etfs }}</div>
+                    <div class="text-xs text-gray-500 mt-1">分散风险配置</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                    <div class="text-gray-600 text-sm">投资组合</div>
+                    <div class="text-3xl font-bold text-gray-800">{{ summary.total_portfolios }}</div>
+                    <div class="text-xs text-gray-500 mt-1">策略方案</div>
+                </div>
+            </div>
+
+            <!-- 标签页导航 -->
+            <div class="bg-white rounded-lg shadow-md mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <button
+                            v-for="tab in tabs"
+                            :key="tab.id"
+                            @click="activeTab = tab.id"
+                            :class="[
+                                'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
+                                activeTab === tab.id
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]"
+                        >
+                            {{ tab.icon }} {{ tab.name }}
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- 标签页内容 -->
+                <div class="p-6">
+                    <!-- 高股息股票 -->
+                    <div v-show="activeTab === 'dividend'">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">🔥 高股息股票</h2>
+
+                        <!-- 超高股息率 -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-red-600">超高股息率 (6%以上)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">股票名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">股息率</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">行业</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">分红率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="stock in highDividendStocks.ultra_high" :key="stock.code" class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ stock.name }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.code }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">
+                                                    {{ stock.dividend_rate }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.industry }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.payout_ratio }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 稳健高股息 -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-600">稳健高股息 (4-6%)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">股票名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">股息率</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">行业</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">分红率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="stock in highDividendStocks.stable_high" :key="stock.code" class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ stock.name }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.code }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">
+                                                    {{ stock.dividend_rate }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.industry }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.payout_ratio }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 金融高股息 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3 text-green-600">金融高股息</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">股票名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">股息率</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">行业</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">分红率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="stock in highDividendStocks.financial" :key="stock.code" class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ stock.name }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.code }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-semibold">
+                                                    {{ stock.dividend_rate }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.industry }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ stock.payout_ratio }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 券商股票 -->
+                    <div v-show="activeTab === 'brokers'">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">🏢 券商龙头股票</h2>
+
+                        <!-- 第一梯队 -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-600">第一梯队 (超级龙头)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div v-for="stock in brokerStocks.tier1" :key="stock.code"
+                                     class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-300 rounded-lg p-4">
+                                    <div class="font-bold text-lg text-gray-800 mb-2">{{ stock.name }}</div>
+                                    <div class="text-sm text-gray-600 mb-1">代码: {{ stock.code }}</div>
+                                    <div class="text-sm text-gray-600 mb-1" v-if="stock.revenue">营收: {{ stock.revenue }}</div>
+                                    <div class="text-sm text-gray-600 mb-1" v-if="stock.net_profit">净利: {{ stock.net_profit }}</div>
+                                    <div class="text-xs text-gray-500 mt-2 italic">{{ stock.description }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第二梯队 -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-600">第二梯队 (头部券商)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div v-for="stock in brokerStocks.tier2" :key="stock.code"
+                                     class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-4">
+                                    <div class="font-bold text-lg text-gray-800 mb-2">{{ stock.name }}</div>
+                                    <div class="text-sm text-gray-600 mb-1">代码: {{ stock.code }}</div>
+                                    <div class="text-sm text-gray-600 mb-1" v-if="stock.net_profit">净利: {{ stock.net_profit }}</div>
+                                    <div class="text-xs text-gray-500 mt-2 italic">{{ stock.description }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第三梯队 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3 text-purple-600">第三梯队 (特色券商)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div v-for="stock in brokerStocks.tier3" :key="stock.code"
+                                     class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-300 rounded-lg p-4">
+                                    <div class="font-bold text-lg text-gray-800 mb-2">{{ stock.name }}</div>
+                                    <div class="text-sm text-gray-600 mb-1">代码: {{ stock.code }}</div>
+                                    <div class="text-xs text-gray-500 mt-2 italic">{{ stock.description }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ETF产品 -->
+                    <div v-show="activeTab === 'etfs'">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">📈 ETF布局方案</h2>
+
+                        <!-- 券商ETF -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-600">🎯 券商板块ETF</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-blue-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETF名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">基金公司</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">特点</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">适合人群</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="etf in etfs.broker" :key="etf.code" class="hover:bg-blue-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ etf.name }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-mono">
+                                                    {{ etf.code }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ etf.fund_company }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ etf.description }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ etf.suitable_for }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 红利ETF -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-red-600">💰 高股息/红利ETF</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-red-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETF名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">基金公司</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">特点</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">适合人群</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="etf in etfs.dividend" :key="etf.code" class="hover:bg-red-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ etf.name }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-red-600 text-white px-2 py-1 rounded text-sm font-mono">
+                                                    {{ etf.code }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ etf.fund_company }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ etf.description }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ etf.suitable_for }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 银行ETF -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3 text-green-600">🏦 银行板块ETF</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-green-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETF名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">基金公司</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">特点</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="etf in etfs.bank" :key="etf.code" class="hover:bg-green-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ etf.name }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-mono">
+                                                    {{ etf.code }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ etf.fund_company }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ etf.description }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 大金融ETF -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3 text-purple-600">🏢 大金融ETF (综合配置)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-purple-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETF名称</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">代码</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">基金公司</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">特点</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="etf in etfs.financial" :key="etf.code" class="hover:bg-purple-50">
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ etf.name }}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="bg-purple-600 text-white px-2 py-1 rounded text-sm font-mono">
+                                                    {{ etf.code }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">{{ etf.fund_company }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ etf.description }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 投资组合 -->
+                    <div v-show="activeTab === 'portfolios'">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">💼 投资组合策略</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- 保守型 -->
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-lg p-6">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-3xl mr-2">🛡️</span>
+                                    <h3 class="text-xl font-bold text-green-800">{{ portfolios.conservative.name }}</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">资产配置：</h4>
+                                    <div v-for="(value, key) in portfolios.conservative.allocation" :key="key"
+                                         class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">{{ key }}:</span>
+                                        <span class="text-sm font-semibold text-gray-800">{{ value }}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">推荐产品：</h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li v-for="product in portfolios.conservative.recommended_products" :key="product"
+                                            class="flex items-start">
+                                            <span class="mr-2">•</span>
+                                            <span>{{ product }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white bg-opacity-60 rounded p-3 text-sm text-gray-700">
+                                    <strong>特点：</strong> {{ portfolios.conservative.features }}
+                                </div>
+                                <div v-if="portfolios.conservative.sample_100k" class="mt-4 bg-green-200 rounded p-3">
+                                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">10万元配置示例：</h4>
+                                    <div v-for="(value, key) in portfolios.conservative.sample_100k" :key="key"
+                                         class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-600">{{ key }}:</span>
+                                        <span class="font-semibold text-gray-800">¥{{ value.toLocaleString() }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 平衡型 -->
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg p-6">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-3xl mr-2">⚖️</span>
+                                    <h3 class="text-xl font-bold text-blue-800">{{ portfolios.balanced.name }}</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">资产配置：</h4>
+                                    <div v-for="(value, key) in portfolios.balanced.allocation" :key="key"
+                                         class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">{{ key }}:</span>
+                                        <span class="text-sm font-semibold text-gray-800">{{ value }}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">推荐产品：</h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li v-for="product in portfolios.balanced.recommended_products" :key="product"
+                                            class="flex items-start">
+                                            <span class="mr-2">•</span>
+                                            <span>{{ product }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white bg-opacity-60 rounded p-3 text-sm text-gray-700">
+                                    <strong>特点：</strong> {{ portfolios.balanced.features }}
+                                </div>
+                            </div>
+
+                            <!-- 进取型 -->
+                            <div class="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-lg p-6">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-3xl mr-2">🚀</span>
+                                    <h3 class="text-xl font-bold text-red-800">{{ portfolios.aggressive.name }}</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">资产配置：</h4>
+                                    <div v-for="(value, key) in portfolios.aggressive.allocation" :key="key"
+                                         class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">{{ key }}:</span>
+                                        <span class="text-sm font-semibold text-gray-800">{{ value }}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">推荐产品：</h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li v-for="product in portfolios.aggressive.recommended_products" :key="product"
+                                            class="flex items-start">
+                                            <span class="mr-2">•</span>
+                                            <span>{{ product }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white bg-opacity-60 rounded p-3 text-sm text-gray-700">
+                                    <strong>特点：</strong> {{ portfolios.aggressive.features }}
+                                </div>
+                                <div v-if="portfolios.aggressive.sample_100k" class="mt-4 bg-red-200 rounded p-3">
+                                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">10万元配置示例：</h4>
+                                    <div v-for="(value, key) in portfolios.aggressive.sample_100k" :key="key"
+                                         class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-600">{{ key }}:</span>
+                                        <span class="font-semibold text-gray-800">¥{{ value.toLocaleString() }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 风险提示 -->
+                        <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                            <h4 class="font-bold text-yellow-800 mb-2">⚠️ 风险提示</h4>
+                            <ul class="text-sm text-yellow-700 space-y-1 ml-4">
+                                <li>• <strong>政策风险：</strong>降准降息若不及预期，板块可能回调</li>
+                                <li>• <strong>市场风险：</strong>如果经济复苏不如预期，高股息也会承压</li>
+                                <li>• <strong>估值风险：</strong>券商板块当前PE约18倍，非历史最低</li>
+                                <li>• <strong>分红兑现：</strong>高股息股需关注实际分红是否兑现</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="bg-gray-800 text-white mt-8 py-6">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-sm">投资有风险，入市需谨慎。本系统仅供参考，不构成投资建议。</p>
+                <p class="text-xs mt-2 text-gray-400">Investment Tracking System &copy; 2026</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'dividend',
+                    tabs: [
+                        { id: 'dividend', name: '高股息股票', icon: '💎' },
+                        { id: 'brokers', name: '券商股票', icon: '🏢' },
+                        { id: 'etfs', name: 'ETF产品', icon: '📈' },
+                        { id: 'portfolios', name: '投资组合', icon: '💼' }
+                    ],
+                    summary: {
+                        total_high_dividend_stocks: 0,
+                        total_broker_stocks: 0,
+                        total_etfs: 0,
+                        total_portfolios: 0
+                    },
+                    highDividendStocks: {
+                        ultra_high: [],
+                        stable_high: [],
+                        financial: []
+                    },
+                    brokerStocks: {
+                        tier1: [],
+                        tier2: [],
+                        tier3: []
+                    },
+                    etfs: {
+                        broker: [],
+                        dividend: [],
+                        bank: [],
+                        financial: []
+                    },
+                    portfolios: {
+                        conservative: {},
+                        balanced: {},
+                        aggressive: {}
+                    },
+                    updateTime: ''
+                }
+            },
+            mounted() {
+                this.loadAllData();
+                this.updateTime = new Date().toLocaleString('zh-CN');
+            },
+            methods: {
+                async loadAllData() {
+                    try {
+                        const response = await axios.get('/api/all');
+                        const data = response.data;
+
+                        this.highDividendStocks = data.high_dividend_stocks;
+                        this.brokerStocks = data.broker_stocks;
+                        this.etfs = data.etfs;
+                        this.portfolios = data.portfolios;
+
+                        const summaryResponse = await axios.get('/api/summary');
+                        this.summary = summaryResponse.data;
+                    } catch (error) {
+                        console.error('加载数据失败:', error);
+                        alert('加载数据失败，请刷新页面重试');
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
