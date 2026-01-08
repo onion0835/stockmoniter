@@ -205,10 +205,11 @@ def get_status():
 
 @app.route('/api/stock-chart/<code>')
 def get_stock_chart(code):
-    """获取股票/ETF的历史行情数据（含同比对比）"""
+    """获取股票/ETF的历史行情数据（含同比对比和历史事件标记）"""
     try:
         import akshare as ak
         from datetime import datetime, timedelta
+        from events_data import get_events_in_range, get_event_color, get_event_symbol
 
         # 获取时间范围（默认最近3个月）
         period = request.args.get('period', '3m')
@@ -260,6 +261,21 @@ def get_stock_chart(code):
         # 获取去年同期数据
         df_last_year = fetch_stock_data(last_year_start_str, last_year_end_str)
 
+        # 获取当前时间范围内的历史事件
+        events = get_events_in_range(start_date, end_date)
+
+        # 为每个事件添加颜色和图标信息
+        events_with_style = []
+        for event in events:
+            events_with_style.append({
+                'date': event['date'],
+                'name': event['name'],
+                'type': event['type'],
+                'impact': event['impact'],
+                'color': get_event_color(event['type']),
+                'symbol': get_event_symbol(event['type'])
+            })
+
         # 转换当前周期数据格式
         dates = df_current['日期'].astype(str).tolist()
 
@@ -276,7 +292,8 @@ def get_stock_chart(code):
                 'price': float(df_current.iloc[-1]['收盘']),
                 'change': float(df_current.iloc[-1]['涨跌幅']) if '涨跌幅' in df_current.columns else 0,
                 'volume': int(df_current.iloc[-1]['成交量'])
-            }
+            },
+            'events': events_with_style  # 添加历史事件数据
         }
 
         # 如果去年同期数据存在，添加到返回结果中
@@ -297,6 +314,8 @@ def get_stock_chart(code):
 
     except Exception as e:
         print(f"获取股票走势失败: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'message': f'获取数据失败: {str(e)}'

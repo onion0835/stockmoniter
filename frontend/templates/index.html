@@ -547,6 +547,33 @@
                     </div>
                     <div v-else id="stock-chart" class="w-full" style="height: 500px;"></div>
                 </div>
+
+                <!-- 事件标记图例说明 -->
+                <div class="px-6 py-3 bg-gray-50 border-t">
+                    <div class="text-xs text-gray-600">
+                        <span class="font-semibold mr-2">事件标记图例:</span>
+                        <span class="inline-flex items-center mr-3">
+                            <span class="inline-block w-3 h-3 rounded-full mr-1" style="background: #DC2626;"></span>
+                            <span>美国大选</span>
+                        </span>
+                        <span class="inline-flex items-center mr-3">
+                            <span class="inline-block w-3 h-3 rounded-full mr-1" style="background: #2563EB;"></span>
+                            <span>美联储利率</span>
+                        </span>
+                        <span class="inline-flex items-center mr-3">
+                            <span class="inline-block w-3 h-3 rounded-full mr-1" style="background: #16A34A;"></span>
+                            <span>中国降息</span>
+                        </span>
+                        <span class="inline-flex items-center mr-3">
+                            <span class="inline-block w-3 h-3 rounded-full mr-1" style="background: #059669;"></span>
+                            <span>中国降准</span>
+                        </span>
+                        <span class="inline-flex items-center mr-3">
+                            <span class="inline-block w-3 h-3 rounded-full mr-1" style="background: #9333EA;"></span>
+                            <span>全球事件</span>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -782,6 +809,29 @@
                     const hasLastYearData = data.lastYear && data.lastYear.prices && data.lastYear.prices.close;
                     const lastYearCloseData = hasLastYearData ? data.lastYear.prices.close : [];
 
+                    // 准备历史事件标记数据
+                    const events = data.events || [];
+                    const eventMarkLines = events.map(event => ({
+                        name: event.name,
+                        xAxis: event.date,
+                        label: {
+                            formatter: event.name,
+                            fontSize: 10,
+                            color: '#fff',
+                            backgroundColor: event.color,
+                            padding: [3, 5],
+                            borderRadius: 3
+                        },
+                        lineStyle: {
+                            color: event.color,
+                            type: 'solid',
+                            width: 2,
+                            opacity: 0.6
+                        }
+                    }));
+
+                    console.log('历史事件数量:', events.length, events);
+
                     // 配置图表
                     const option = {
                         title: {
@@ -907,6 +957,12 @@
                                     color0: '#22c55e',
                                     borderColor: '#ef4444',
                                     borderColor0: '#22c55e'
+                                },
+                                markLine: {
+                                    silent: false,
+                                    symbol: 'none',
+                                    data: eventMarkLines,
+                                    animation: true
                                 }
                             },
                             {
@@ -950,6 +1006,9 @@
                     console.log('图表配置已设置，K线数据数量:', klineData.length);
                     if (hasLastYearData) {
                         console.log('去年同期数据数量:', lastYearCloseData.length);
+                    }
+                    if (events.length > 0) {
+                        console.log('已添加历史事件标记:', events.length, '个');
                     }
 
                     // 强制调整图表大小
